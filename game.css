@@ -3,6 +3,10 @@
     display: none;
 }
 
+.faded {
+    fill-opacity: 0.15;
+}
+
 #black-tree {
     width: 50%;
 }
