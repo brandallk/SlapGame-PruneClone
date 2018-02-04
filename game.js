@@ -4,8 +4,10 @@ const game = new Game();
 game.drawTargetName(game.target);
 game.drawCounters(game.target);
 game.drawActionButtons(game.target);
+game.drawModifierButtons(game.target);
 game.target.animateGrowth(game.target, 1, game.target.animationTimeDiff);
 game.activatePruneButtons(game.target);
+game.activateModifierButtons(game.target);
 
 
 /* Target Class */
@@ -112,10 +114,20 @@ function animateGrowth(target, startingSegment, timeDifferential) {
     // Unhide growth segments on a staggered time-schedule
     function delayDisplay(element, interval) {
         function unhide() {
-            element.classList.toggle("hidden");
-            target.updateSegmentCount(); // Also update the growth-segments count
-            target.updateCurrentSegment(); // ...and the current-segment record
+            if (target.segmentCount < target.maxSegments) {
+                element.classList.toggle("hidden");
+            }
+            if (target.segmentCount >= target.maxSegments ||
+                target.currentSegmentNumber === target.totalSegments) {
+                    game.end(game.getResult(target));
+            } else {
+                if (target.segmentCount < target.maxSegments) {
+                    target.updateSegmentCount(); // Also update the growth-segments count
+                    target.updateCurrentSegment(); // ...and the current-segment record
+                }
+            }
         }
+
         const timeoutID = setTimeout(unhide, interval);
         target.timeouts.push(timeoutID);
     }
@@ -185,6 +197,9 @@ function Game() {
     this.drawActionButtons = drawActionButtons;
     this.activatePruneButtons = activatePruneButtons;
 
+    this.end = end;
+    this.getResult = getResult;
+
     this.modifiers = {
         clouds: new Modifier(
             "clouds",
@@ -214,12 +229,64 @@ function Game() {
     this.activate = activate;
 }
 
-function drawModifierButtons(target) {
+function end(gameResult) {
+    // Halt the current animation
+    this.target.timeouts.forEach( timeoutID => {
+        clearTimeout(timeoutID);
+    });
 
+    const msgHeading = document.querySelector(".main-control .game-result");
+    if (gameResult === "success") {
+        msgHeading.innerText = "SUCCESS!";
+    } else {
+        msgHeading.innerText = "FAILURE!";
+    }
+
+    const beginButton = document.querySelector(".main-control button.begin");
+    const resetButton = document.querySelector(".main-control button.reset");
+    beginButton.classList.add("hidden");
+    resetButton.classList.remove("hidden");
+}
+
+function getResult(target) {
+    if (target.segmentCount < target.maxSegments) {
+        return "success";
+    }
+    return "failure";
+}
+
+function drawModifierButtons(target) {
+    const targetDiv = document.querySelector(`#${target.domID}`);
+
+    buttonsDiv = document.createElement("div");
+    buttonsDiv.className = "target-counters";
+    targetDiv.insertAdjacentElement('beforebegin', buttonsDiv);
+
+    const template = `
+        <button class="modifier handicap btn">HANDICAP</button>
+        <button class="modifier clouds btn">CLOUDS</button>
+        <button class="modifier moonlight btn">MOONLIGHT</button>
+    `;
+    buttonsDiv.innerHTML = template;
 }
 
 function activateModifierButtons(target) {
-
+    const buttons = document.querySelectorAll(`.modifier.btn`);
+    
+    buttons.forEach( button => {
+        button.addEventListener("click", () => {
+            const buttonClasses = Array.from(button.classList);
+            if (buttonClasses.includes("handicap")) {
+                target.giveItem(game.modifiers.handicap);
+            }
+            if (buttonClasses.includes("clouds")) {
+                target.giveItem(game.modifiers.clouds);
+            }
+            if (buttonClasses.includes("moonlight")) {
+                target.giveItem(game.modifiers.moonlight);
+            }
+        });
+    });
 }
 
 function activate() {
