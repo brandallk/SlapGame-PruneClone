@@ -21,7 +21,7 @@ function Target(name, domID, totalSegments, maxSegments, maxPrunes, animationTim
     this.trunkSegments = trunkSegments;
     this.postBranchSegments = postBranchSegments; // data-segOrder attributes of target (tree) segments immediately following a branch-point
     this.userActions = []; // can include "prune", "fertilize", and "poison"
-    this.modItems = []; // items can include "sunlight", "moonlight", and "rain"
+    this.modItems = []; // modifier items can include "clouds", "moonlight", and "handicap"
     this.getSegments = getSegments;
     this.animationTimeDiff = animationTimeDiff;
     this.timeouts = [];
@@ -29,8 +29,9 @@ function Target(name, domID, totalSegments, maxSegments, maxPrunes, animationTim
     this.updateSegmentCount = updateSegmentCount;
     this.updateCurrentSegment = updateCurrentSegment;
     this.prune = prune;
+    this.modifiers = [];
     this.giveItem = giveItem;
-    this.addMods = addMods;
+    // this.addMods = addMods; // This method is not needed: this.giveItem applies modifier effects.
 }
 
 
@@ -139,12 +140,35 @@ function updateSegmentCount(number) {
     segmentCounterSpan.innerText = this.segmentCount;
 }
 
-function giveItem() {
+function giveItem(modifier) {
+    if (!this.modifiers.includes(modifier)) {
+        this.modifiers.push(modifier);
+        modifier.modifierEffect1();
+        if (modifier.modifierEffect2 !== null) {
+            modifier.modifierEffect2();
+        }
+        game.drawCounters(this);
 
+        if (modifier.name = "clouds") {
+            // Halt the current animation
+            this.timeouts.forEach( timeoutID => {
+                clearTimeout(timeoutID);
+            });
+        
+            // Begin animating growth at the modified speed
+            this.animateGrowth(this, this.currentSegmentNumber, this.animationTimeDiff);
+        }
+    }
 }
 
-function addMods() {
 
+/* Modifier Class */
+function Modifier(name, modifier, modifierEffect1, modifierEffect2, description) {
+    this.name = name;
+    this.modifier = modifier;
+    this.modifierEffect1 = modifierEffect1;
+    this.modifierEffect2 = modifierEffect2;
+    this.description = description;
 }
 
 
@@ -155,21 +179,51 @@ function Game() {
     ], [
         21, 27, 33, 57, 83, 95, 101, 117, 129, 135, 142
     ]);
+
     this.drawTargetName = drawTargetName;
     this.drawCounters = drawCounters;
     this.drawActionButtons = drawActionButtons;
     this.activatePruneButtons = activatePruneButtons;
-    
-    // this.activate = activate;
-    // this.drawStatus = drawStatus;
-    // this.activateModBtns = activateModBtns;
-    // this.healthSpan = document.querySelector(".target-health");
-    // this.hitsSpan = document.querySelector(".target-hits");
-    // this.modifiers = {
-    //     modifier1: new Modifier("modifier1", 0.25, "description1"),
-    //     modifier2: new Modifier("modifier2", 0.5, "description2"),
-    //     modifier3: new Modifier("modifier3", 0.75, "description3")
-    // };
+
+    this.modifiers = {
+        clouds: new Modifier(
+            "clouds",
+            [1.5, 5],
+            function() { game.target.animationTimeDiff *= this.modifier[0] },
+            function() { game.target.maxSegments -= this.modifier[1] },
+            "Clouds reduce the target (tree) growth rate, but also decrease the maximum allowed growth segments."
+        ),
+        moonlight: new Modifier(
+            "moonlight",
+            [8, 2],
+            function() { game.target.maxSegments += this.modifier[0] },
+            function() { game.target.maxPrunes -= this.modifier[1] },
+            "Moonlight increases maximum allowed growth segments, but also reduces the maximum allowed prune actions."
+        ),
+        handicap: new Modifier(
+            "handicap",
+            10,
+            function() { game.target.maxSegments += this.modifier },
+            null,
+            "Handicap adds 10 to the maxiumum allowed growth segments."
+        )
+    }
+
+    this.drawModifierButtons = drawModifierButtons;
+    this.activateModifierButtons = activateModifierButtons;
+    this.activate = activate;
+}
+
+function drawModifierButtons(target) {
+
+}
+
+function activateModifierButtons(target) {
+
+}
+
+function activate() {
+
 }
 
 function activatePruneButtons(target) {
@@ -200,21 +254,27 @@ function drawTargetName(target) {
 
 function drawCounters(target) {
     const targetDiv = document.querySelector(`#${target.domID}`);
-    const newDiv = document.createElement("div");
-    newDiv.className = "target-counters";
-    targetDiv.insertAdjacentElement('afterbegin', newDiv);
+    let countersDiv = document.querySelector(`#${target.domID} div.target-counters`);
+
+    if (countersDiv) {
+        countersDiv.innerHTML = "";
+    } else {
+        countersDiv = document.createElement("div");
+        countersDiv.className = "target-counters";
+        targetDiv.insertAdjacentElement('afterbegin', countersDiv);
+    }
 
     const template = `
         <div class="game-stats-counter">
             <span class="counter-label">Growth segments (of ${target.maxSegments} max): </span>
-            <span class="segments-counter">0</span>
+            <span class="segments-counter">${target.currentSegmentNumber}</span>
         </div>
         <div class="game-stats-counter">
             <span class="counter-label">Prunes used (of ${target.maxPrunes} max): </span>
-            <span class="prunes-counter">0</span>
+            <span class="prunes-counter">${target.prunes}</span>
         </div>
     `;
-    newDiv.innerHTML = template;
+    countersDiv.innerHTML = template;
 }
 
 function drawActionButtons(target) {
