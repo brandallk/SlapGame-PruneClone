@@ -1,12 +1,198 @@
 
+@import url('https://fonts.googleapis.com/css?family=Merriweather');
+
+
+
 .hidden {
     display: none;
 }
 
 .faded {
-    fill-opacity: 0.15;
+    /* fill-opacity: 0.15; */
+    opacity: 0.15;
+}
+
+
+
+body {
+    max-width: 1500px;
+}
+
+
+
+header {
+    background-color: rgb(51, 51, 51);
+    padding: 1rem 0 0.1rem;
+    color: rgb(231, 231, 231);
+    text-align: center;
+    font-family: 'Merriweather', serif;
+}
+
+header h1 {
+    font-size: 1.5rem;
+}
+
+header hr {
+    border-top: 2px solid rgba(240, 0, 1, 0.3);
+}
+
+
+
+.game-window {
+    padding: 0;
+    background-color: rgb(248, 237, 207);
+    color: rgb(51, 51, 51);
+}
+
+div.target-counters {
+    margin-bottom: 4.6rem;
+    margin-top: -1.5rem;
+    font-size: 0.8rem;
+}
+
+@media (min-width: 420px) {
+    div.target-counters {
+        margin-right: 10%;
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 550px) {
+    div.target-counters {
+        margin-right: 5%;
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 900px) {
+    div.target-counters { margin-bottom: 5.6rem; }
+}
+
+@media (min-width: 1200px) {
+    div.target-counters { margin-bottom: 6.6rem; }
+}
+
+div.game-stats-counter {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+div.game-stats-counter p {
+    margin-bottom: 0;
 }
 
 #black-tree {
-    width: 50%;
+    width: 53%;
+    position: absolute;
+    bottom: 7.5%;
+    left: 22.3%;
+}
+
+@media (min-width: 400px) {
+    #black-tree { bottom: 7.5%; }
+}
+
+@media (min-width: 500px) {
+    #black-tree { bottom: 9%; }
+}
+
+@media (min-width: 650px) {
+    #black-tree { bottom: 10%; }
+}
+
+@media (min-width: 768px) {
+    #black-tree { bottom: 10.5%; }
+}
+
+@media (min-width: 880px) {
+    #black-tree { bottom: 10%; }
+}
+
+@media (min-width: 1000px) {
+    #black-tree { bottom: 10.5%; }
+}
+
+@media (min-width: 1200px) {
+    #black-tree { bottom: 11%; }
+}
+
+@media (min-width: 1500px) {
+    #black-tree { bottom: 11.5%; }
+}
+
+div.modifier-badges {
+    position: relative;
+}
+
+img.clouds {
+    width: 20%;
+    position: absolute;
+    right: 3%;
+    top: 2rem;
+}
+
+img.moonlight {
+    width: 8%;
+    position: absolute;
+    right: 4%;
+    top: 1rem;
+}
+
+@media (min-width: 1050px) {
+    img.clouds { width: 13%; }
+    img.moonlight { width: 6%; }
+}
+
+img.tree-blossoms {
+    width: 15%;
+    position: absolute;
+    right: 12%;
+    top: -7%;
+}
+
+.cave {
+    margin-top: 7.5rem;
+    position: relative;
+}
+
+div.handicap.badge {
+    position: absolute;
+    bottom: 15%;
+    right: 1rem;
+    font-size: 0.6rem;
+}
+
+@media (min-width: 450px) {
+    div.handicap.badge { font-size: 1rem; }
+}
+
+@media (min-width: 576px) {
+    div.handicap.badge { right: 7%; }
+}
+
+
+
+.game-info {
+    background-color: #333;
+}
+
+
+
+footer {
+    background-color: rgb(51, 51, 51);
+    color: rgb(231, 231, 231);
+    padding: 1rem 2rem 2rem;
+}
+
+div.initialize-buttons {
+    padding: 1rem 0;
+}
+
+h2.game-result {
+    margin-top: 1rem;
+}
+
+.begin.btn,
+.reset.btn {
+    padding: 0.375rem 4rem;
 }

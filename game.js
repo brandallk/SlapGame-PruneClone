@@ -1,10 +1,10 @@
 
 // Initiate the game
 const game = new Game();
-game.drawTargetName(game.target);
+// game.drawTargetName(game.target); // (In this game's context, it doesn't really make sense to display the target's name.)
 game.drawCounters(game.target);
-game.drawActionButtons(game.target);
 game.drawModifierButtons(game.target);
+game.drawActionButtons(game.target);
 game.activatePruneButtons(game.target);
 game.activateModifierButtons(game.target);
 game.activateStartButton();
@@ -197,7 +197,7 @@ function Game() {
         21, 27, 33, 57, 83, 95, 101, 117, 129, 135, 142
     ]);
 
-    this.drawTargetName = drawTargetName;
+    // this.drawTargetName = drawTargetName;  // (In this game's context, it doesn't really make sense to display the target's name.)
     this.drawCounters = drawCounters;
     this.drawActionButtons = drawActionButtons;
     this.activatePruneButtons = activatePruneButtons;
@@ -314,16 +314,20 @@ function getResult(target) {
 }
 
 function drawModifierButtons(target) {
-    const targetDiv = document.querySelector(`#${target.domID}`);
+    const targetDiv = document.querySelector(".main-control");
+
+    rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+    targetDiv.insertAdjacentElement('afterbegin', rowDiv);
 
     buttonsDiv = document.createElement("div");
-    buttonsDiv.className = "target-counters";
-    targetDiv.insertAdjacentElement('beforebegin', buttonsDiv);
+    buttonsDiv.className = "modifier-buttons col-12 col-md-6 text-center";
+    rowDiv.insertAdjacentElement('afterbegin', buttonsDiv);
 
     const template = `
-        <button class="modifier handicap btn">HANDICAP</button>
-        <button class="modifier clouds btn">CLOUDS</button>
-        <button class="modifier moonlight btn">MOONLIGHT</button>
+        <button class="modifier handicap btn btn-sm btn-outline-danger">HANDICAP</button>
+        <button class="modifier clouds btn btn-sm btn-outline-danger">CLOUDS</button>
+        <button class="modifier moonlight btn btn-sm btn-outline-danger">MOONLIGHT</button>
     `;
     buttonsDiv.innerHTML = template;
 }
@@ -354,7 +358,7 @@ function activate() {
 }
 
 function activatePruneButtons(target) {
-    const buttons = document.querySelectorAll(`#${target.domID} .prune.btn`);
+    const buttons = document.querySelectorAll(".prune.btn");
     
     buttons.forEach( button => {
         button.addEventListener("click", () => {
@@ -373,13 +377,14 @@ function activatePruneButtons(target) {
     });
 }
 
-function drawTargetName(target) {
-    const targetDiv = document.querySelector(`#${target.domID}`);
-    const newElt = document.createElement("p");
-    newElt.className = "target-name";
-    newElt.innerText = target.name;
-    targetDiv.appendChild(newElt);
-}
+ // (In this game's context, it doesn't really make sense to display the target's name.)
+// function drawTargetName(target) {
+//     const targetDiv = document.querySelector(`#${target.domID}`);
+//     const newElt = document.createElement("p");
+//     newElt.className = "target-name";
+//     newElt.innerText = target.name;
+//     targetDiv.appendChild(newElt);
+// }
 
 function drawCounters(target) {
     const targetDiv = document.querySelector(`#${target.domID}`);
@@ -394,28 +399,30 @@ function drawCounters(target) {
     }
 
     const template = `
-        <div class="game-stats-counter">
-            <span class="counter-label">Growth segments (of ${target.maxSegments} max): </span>
-            <span class="segments-counter">${target.currentSegmentNumber}</span>
-        </div>
-        <div class="game-stats-counter">
-            <span class="counter-label">Prunes used (of ${target.maxPrunes} max): </span>
-            <span class="prunes-counter">${target.prunes}</span>
+        <div class="row">
+            <div class="game-stats-counter col-10">
+                <p class="counter-label text-right">growth segments (${target.maxSegments} max): </p>
+                <p class="counter-label text-right">prunes (${target.maxPrunes} max): </p>
+            </div>
+            <div class="game-stats-counter col-2">
+                <p class="segments-counter">${target.currentSegmentNumber}</p>
+                <p class="prunes-counter">${target.prunes}</p>
+            </div>
         </div>
     `;
     countersDiv.innerHTML = template;
 }
 
 function drawActionButtons(target) {
-    const targetDiv = document.querySelector(`#${target.domID}`);
+    const targetDiv = document.querySelector(".main-control div.row");
     const newDiv = document.createElement("div");
-    newDiv.className = "action-buttons";
-    targetDiv.appendChild(newDiv);
+    newDiv.className = "action-buttons col-12 mb-4 mb-md-0 col-md-6 text-center";
+    targetDiv.insertAdjacentElement('afterbegin', newDiv);
 
     const template = `
-        <button class="prune x1 btn">PRUNE (x1)</button>
-        <button class="prune x2 btn">PRUNE (x2)</button>
-        <button class="prune x3 btn">PRUNE (x3)</button>
+        <button class="prune x1 btn btn-sm btn-outline-danger">PRUNE (x1)</button>
+        <button class="prune x2 btn btn-sm btn-outline-danger">PRUNE (x2)</button>
+        <button class="prune x3 btn btn-sm btn-outline-danger">PRUNE (x3)</button>
     `;
     newDiv.innerHTML = template;
 }
