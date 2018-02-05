@@ -45,21 +45,25 @@ function Target(name, domID, totalSegments, maxSegments, maxPrunes, animationTim
 function giveItem(modifier) {
     const gameWindow = document.querySelector("div.game-window");
     const handicapIndicator = document.querySelector("div.handicap span.indicator");
+
+    // Get a list of modifiers' names currently added to the target (tree)
     const currentModNames = this.modifiers.map( modifier => {
         return modifier.name;
     });
 
-    if (!this.modifiers.includes(modifier)) {
-        this.modifiers.push(modifier);
-        modifier.modifierEffect1();
+    if (!this.modifiers.includes(modifier)) { // Only add the modifier if it hasn't been added already
+        this.modifiers.push(modifier); // Add the modifier to the target (tree)'s list of moddifiers
+        modifier.modifierEffect1(); // Apply the modifier's (first) effect to the game setup
         if (modifier.modifierEffect2 !== null) {
-            modifier.modifierEffect2();
+            modifier.modifierEffect2(); // If there is a 2nd modifier effect, also apply if to the game setup
         }
-        game.drawCounters(this);
 
+        // Update the game display
+        game.drawCounters(this);
         modifier.toggleIndicator.classList.remove("faded");
     }
     
+    // Apply game-display indicators to signal to the user which modifiers have been applied to the game setup
     if (currentModNames.includes("clouds") && currentModNames.includes("moonlight")) {
         gameWindow.classList.add("darker-bluer-background")
     } else if (currentModNames.includes("clouds")) {
