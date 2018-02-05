@@ -1,9 +1,9 @@
 
 // Initiate the game
 const game = new Game();
-game.drawCounters(game.target);
-game.drawButtons();
-game.activate();
+game.drawCounters(game.target); // add HTML elements that report changing segment-count and prune-action count during game-play
+game.drawButtons(); // add HTML buttons that can apply modifiers (before game-play) or prune-actions (during game-play)
+game.activate(); // apply a set of event handlers for buttons
 // game.drawTargetName(game.target); // (In this game's context, it doesn't really make sense to display the target's name.)
 
 
@@ -14,33 +14,34 @@ function Target(name, domID, totalSegments, maxSegments, maxPrunes, animationTim
     this.name = name;
     this.domID = domID; // id of the HTML element containing the target
 
-    this.totalSegments = totalSegments;
+    this.totalSegments = totalSegments; // total number of growth segments in the target (tree)
     this.maxSegments = maxSegments; // maximum number of segments allowed before game is lost (31 is minimum to win)
-    this.originalMaxSegments = maxSegments;
-    this.trunkSegments = trunkSegments;
+    this.originalMaxSegments = maxSegments; // record the number set at instatiation for reference when resetting the game
+    this.trunkSegments = trunkSegments; // list of growth segments that belong the to target (tree) main trunk
     this.postBranchSegments = postBranchSegments; // data-segOrder attributes of target (tree) segments immediately following a branch-point
     this.segmentCount = 0; // number of growth segments the target (tree) has added
     this.currentSegmentNumber = 0; // the data-segOrder attribute of the last-added growth segment
 
     this.maxPrunes = maxPrunes; // maximum number of prune-actions allowed (11 is minimum to win)
-    this.originalMaxPrunes = maxPrunes;
+    this.originalMaxPrunes = maxPrunes; // record the number set at instatiation for reference when resetting the game
     this.prunes = 0; // number of prune-actions enacted by user
 
-    this.animationTimeDiff = animationTimeDiff;
-    this.originalAnimationTimeDiff = animationTimeDiff;
-    this.timeouts = [];
+    this.animationTimeDiff = animationTimeDiff; // time-delay im milliseconds between exposing sequential growth segments in the growth animation
+    this.originalAnimationTimeDiff = animationTimeDiff; // record the number set at instatiation for reference when resetting the game
+    this.timeouts = []; // list of setTimeout IDs for the animation, for reference so they can be cancelled to stop the animation
 
-    this.modifiers = []; // modifier items can include "clouds", "moonlight", and "handicap"
-    this.giveItem = giveItem;
+    this.modifiers = []; // modifier items change game settings: can include "clouds", "moonlight", and/or "handicap"
+    this.giveItem = giveItem; // add a modifier to the game and apply its effect
 
-    this.prune = prune;
-    this.animateGrowth = animateGrowth;
-    this.getSegments = getSegments;
-    this.updateSegmentCount = updateSegmentCount;
-    this.updateCurrentSegment = updateCurrentSegment;
-    this.toggleVisibility = toggleVisibility;
+    this.prune = prune; // prune a "branch" during growth animation, causing the animation to skip back to the main trunk
+    this.animateGrowth = animateGrowth; // apply a staggered set of setTimeout functions to animate the target (tree) "growth"
+    this.getSegments = getSegments; // fetch references to the target (tree) growth-segment SVG elements, and order them according to animation priority
+    this.updateSegmentCount = updateSegmentCount; // update this.segmentCount to keep track of how many growth segments have been added during animation
+    this.updateCurrentSegment = updateCurrentSegment; // update this.currentSegmentNumber to keep track of the most-recently added growth segment
+    this.toggleVisibility = toggleVisibility; // show or hide the target (tree)
 }
 
+// Add a modifier to the game and apply its effect
 function giveItem(modifier) {
     if (!this.modifiers.includes(modifier)) {
         this.modifiers.push(modifier);
@@ -71,6 +72,8 @@ function giveItem(modifier) {
     }
 }
 
+/* Prune a "branch" during growth animation, causing the animation to skip back to the main trunk.
+   param "multiplier" = 1, 2, or 3: determines if this is a "prune x1", "prune x2", or "prune x3" action. */
 function prune(multiplier) {
     
     if (this.prunes + multiplier <= this.maxPrunes) { // Can't exceed the maximum allowed number of prune actions
@@ -120,8 +123,8 @@ function prune(multiplier) {
 }
 
 /* Animate the target (tree) "growth" by unhiding its growth segments one at a time.
-   param timeDifferential = number of milliseconds delay between unhiding sequential segments.
-   param startingSegment = the segment number (i.e. data-segOrder attribute) at which to begin animation. */
+   param "timeDifferential" = number of milliseconds delay between unhiding sequential segments.
+   param "startingSegment" = the segment number (i.e. data-segOrder attribute) at which to begin animation. */
 function animateGrowth(target, startingSegment, timeDifferential) {
 
     const segments = target.getSegments().slice(startingSegment - 1);
@@ -165,7 +168,8 @@ function getSegments() {
     });
 }
 
-// Update the count of growth segments that have been added to the target (tree)
+/* Update the count of growth segments that have been added to the target (tree).
+   param "number" is optional. */
 function updateSegmentCount(number) {
     if (!number) { // Update by 1 if no argument was given
         this.segmentCount += 1;
@@ -176,6 +180,8 @@ function updateSegmentCount(number) {
     segmentCounterSpan.innerText = this.segmentCount;
 }
 
+/* Update this.currentSegmentNumber to keep track of the most-recently added growth segment.
+   param "number" is optional. */
 function updateCurrentSegment(number) {
     if (!number) { // Update by 1 if no argument was given
         this.currentSegmentNumber += 1;
@@ -184,6 +190,8 @@ function updateCurrentSegment(number) {
     }
 }
 
+/* Show or hide the target (tree).
+   param "state" = "hide" or "show" */
 function toggleVisibility(state) {
     const targetElt = document.querySelector(`#${this.domID}`);
     const segments = Array.from(targetElt.querySelectorAll(".tree-seg"));
@@ -201,12 +209,12 @@ function toggleVisibility(state) {
     Modifier Class 
 **********************/
 function Modifier(name, modifier, modifierEffect1, modifierEffect2, description, toggleIndicator) {
-    this.name = name;
-    this.modifier = modifier;
-    this.modifierEffect1 = modifierEffect1;
-    this.modifierEffect2 = modifierEffect2;
-    this.description = description;
-    this.toggleIndicator = toggleIndicator;
+    this.name = name; // name of the modifier, i.e. "clouds", "moonlight", "handicap"
+    this.modifier = modifier; // numerical value(s) of the modifier effect(s)
+    this.modifierEffect1 = modifierEffect1; // function applying a modifier effect to the game
+    this.modifierEffect2 = modifierEffect2; // optional second applier function
+    this.description = description; // description of the modifier's effect(s) on the game
+    this.toggleIndicator = toggleIndicator; // reference to the HTML element that signals to the user that the modifier has been applied
 }
 
 
@@ -215,16 +223,16 @@ function Modifier(name, modifier, modifierEffect1, modifierEffect2, description,
 **********************/
 function Game() {
     this.target = new Target(
-        "blacktree",
-        "black-tree",
-        144,
-        54,
-        8,
-        600,
-        [1,2,3,21,22,27,28,57,58,59,60,83,84,95,96,101,102,117,118,119,120,121,129,130,135,136,137,138,142,143,144], 
-        [21, 27, 33, 57, 83, 95, 101, 117, 129, 135, 142]
+        "blacktree", // name
+        "black-tree", // domID
+        144, // totalSegments
+        54, // maxSegments
+        8, // maxPrunes
+        600, // animationTimeDiff (milliseconds)
+        [1,2,3,21,22,27,28,57,58,59,60,83,84,95,96,101,102,117,118,119,120,121,129,130,135,136,137,138,142,143,144], // trunkSegments
+        [21, 27, 33, 57, 83, 95, 101, 117, 129, 135, 142] // postBranchSegments
     );
-    this.modifiers = {
+    this.modifiers = { // list of modifiers that can potentially be added to the target (tree) by user action (via target.giveItem method)
         clouds: new Modifier(
             "clouds",
             [1.5, 5],
@@ -250,19 +258,20 @@ function Game() {
             document.querySelector("div.handicap.badge")
         )
     };
-    this.inProgress = false;
+    this.inProgress = false; // boolean that keeps track of whether or not a game is running or stopped
 
-    this.drawCounters = drawCounters;
-    this.drawButtons = drawButtons;
-    this.activate = activate;
+    this.drawCounters = drawCounters; // add HTML elements that report changing segment-count and prune-action count during game-play
+    this.drawButtons = drawButtons; // add HTML buttons that can apply modifiers (before game-play) or prune-actions (during game-play)
+    this.activate = activate; // apply a set of event handlers for buttons
 
-    this.start = start;
-    this.end = end;
-    this.getResult = getResult;
-    this.reset = reset;
+    this.start = start; // start target (tree) growth animation and game-play
+    this.end = end; // stop the animation and game
+    this.getResult = getResult; // determine if the game was won or lost
+    this.reset = reset; // reset all the things back to their original state so a new, fresh game can be played
     // this.drawTargetName = drawTargetName;  // (In this game's context, it doesn't really make sense to display the target's name.)
 }
 
+// Add HTML elements that report changing segment-count and prune-action count during game-play
 function drawCounters(target) {
     const targetDiv = document.querySelector(`#${target.domID}`);
     let countersDiv = document.querySelector(`#${target.domID} div.target-counters`);
@@ -290,11 +299,13 @@ function drawCounters(target) {
     countersDiv.innerHTML = template;
 }
 
+// Add HTML buttons that can apply modifiers (before game-play) or prune-actions (during game-play). Uses helper functions declared below.
 function drawButtons() {
     drawModifierButtons();
     drawActionButtons();
 }
 
+// Apply a set of event handlers for buttons. Uses helper functions declared below.
 function activate() {
     activateStartButton(this);
     activateResetButton(this);
@@ -302,6 +313,7 @@ function activate() {
     activateModifierButtons(this);
 }
 
+// Start target (tree) growth animation and game-play
 function start() {
     const targetSVG = document.querySelector(`#${this.target.domID} svg`);
     targetSVG.classList.toggle("faded");
@@ -317,6 +329,7 @@ function start() {
     blossoms.classList.add("hidden");
 }
 
+// Stop target (tree) growth animation and game-play. Report game result (win/loss) to the user.
 function end(gameResult) {
     // Halt the current animation
     this.target.timeouts.forEach( timeoutID => {
@@ -340,6 +353,7 @@ function end(gameResult) {
     resetButton.classList.remove("hidden");
 }
 
+// Determine if the game was won or lost: Compare max-allowed growth segments to the number of segments added by game-end
 function getResult(target) {
     if (target.segmentCount < target.maxSegments) {
         return "success";
@@ -347,6 +361,7 @@ function getResult(target) {
     return "failure";
 }
 
+// Reset all the things back to their original state so a new, fresh game can be played
 function reset(target) {
     target.segmentCount = 0;
     target.currentSegmentNumber = 0;
@@ -379,6 +394,7 @@ function reset(target) {
     handicapIndicator.innerHTML = "no";
 }
 
+// Add HTML buttons that can apply prune-actions
 function drawActionButtons() {
     const targetDiv = document.querySelector(".main-control div.row");
     const newDiv = document.createElement("div");
@@ -393,6 +409,7 @@ function drawActionButtons() {
     newDiv.innerHTML = template;
 }
 
+// Add HTML buttons that can apply modifiers
 function drawModifierButtons() {
     const targetDiv = document.querySelector(".main-control");
 
@@ -412,6 +429,7 @@ function drawModifierButtons() {
     buttonsDiv.innerHTML = template;
 }
 
+// Add an event listener for the game's "begin" button
 function activateStartButton(game) {
     const button = document.querySelector(".main-control button.begin");
 
@@ -421,6 +439,7 @@ function activateStartButton(game) {
     });
 }
 
+// Add an event listener for the game's "play again" button
 function activateResetButton(game) {
     const resetButton = document.querySelector(".main-control button.reset");
     const startButton = document.querySelector(".main-control button.begin");
@@ -432,6 +451,7 @@ function activateResetButton(game) {
     });
 }
 
+// Add event listeners for each of the game's "prune"-action buttons
 function activatePruneButtons(game) {
     const buttons = document.querySelectorAll(".prune.btn");
     
@@ -452,6 +472,7 @@ function activatePruneButtons(game) {
     });
 }
 
+// Add event listeners for each of the game's modifier buttons
 function activateModifierButtons(game) {
     const buttons = document.querySelectorAll(`.modifier.btn`);
     
