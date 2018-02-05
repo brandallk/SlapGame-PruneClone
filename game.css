@@ -44,6 +44,18 @@ header hr {
     color: rgb(51, 51, 51);
 }
 
+.game-window.darker-background {
+    background-color: rgb(228, 218, 190);
+}
+
+.game-window.bluer-background {
+    background-color: rgb(207, 247, 248);
+}
+
+.game-window.darker-bluer-background {
+    background-color: rgb(182, 217, 218);
+}
+
 div.target-counters {
     margin-bottom: 4.6rem;
     margin-top: -1.5rem;

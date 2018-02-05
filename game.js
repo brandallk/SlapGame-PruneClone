@@ -175,23 +175,43 @@ function giveItem(modifier) {
             modifier.modifierEffect2();
         }
         game.drawCounters(this);
+
+        modifier.toggleIndicator.classList.remove("faded");
+    }
+
+    const currentModNames = this.modifiers.map( modifier => {
+        return modifier.name;
+    });
+
+    const gameWindow = document.querySelector("div.game-window");
+    const handicapIndicator = document.querySelector("div.handicap span.indicator");
+    if (currentModNames.includes("clouds") && currentModNames.includes("moonlight")) {
+        gameWindow.classList.add("darker-bluer-background")
+    } else if (currentModNames.includes("clouds")) {
+        gameWindow.classList.add("darker-background")
+    } else if (currentModNames.includes("moonlight")) {
+        gameWindow.classList.add("bluer-background")
+    }
+    if (currentModNames.includes("handicap")) {
+        handicapIndicator.innerHTML = "&#10003;";
     }
 }
 
 
 /* Modifier Class */
-function Modifier(name, modifier, modifierEffect1, modifierEffect2, description) {
+function Modifier(name, modifier, modifierEffect1, modifierEffect2, description, toggleIndicator) {
     this.name = name;
     this.modifier = modifier;
     this.modifierEffect1 = modifierEffect1;
     this.modifierEffect2 = modifierEffect2;
     this.description = description;
+    this.toggleIndicator = toggleIndicator;
 }
 
 
 /* Game Class */
 function Game() {
-    this.target = new Target("blacktree", "black-tree", 144, 54, 8, 400, [
+    this.target = new Target("blacktree", "black-tree", 144, 54, 8, 600, [
         1,2,3,21,22,27,28,57,58,59,60,83,84,95,96,101,102,117,118,119,120,121,129,130,135,136,137,138,142,143,144
     ], [
         21, 27, 33, 57, 83, 95, 101, 117, 129, 135, 142
@@ -216,21 +236,24 @@ function Game() {
             [1.5, 5],
             function() { game.target.animationTimeDiff *= this.modifier[0] },
             function() { game.target.maxSegments -= this.modifier[1] },
-            "Clouds reduce the target (tree) growth rate, but also decrease the maximum allowed growth segments."
+            "Clouds reduce the target (tree) growth rate, but also decrease the maximum allowed growth segments.",
+            document.querySelector("img.clouds")
         ),
         moonlight: new Modifier(
             "moonlight",
             [8, 2],
             function() { game.target.maxSegments += this.modifier[0] },
             function() { game.target.maxPrunes -= this.modifier[1] },
-            "Moonlight increases maximum allowed growth segments, but also reduces the maximum allowed prune actions."
+            "Moonlight increases maximum allowed growth segments, but also reduces the maximum allowed prune actions.",
+            document.querySelector("img.moonlight")
         ),
         handicap: new Modifier(
             "handicap",
             10,
             function() { game.target.maxSegments += this.modifier },
             null,
-            "Handicap adds 10 to the maxiumum allowed growth segments."
+            "Handicap adds 10 to the maxiumum allowed growth segments.",
+            document.querySelector("div.handicap.badge")
         )
     }
 
@@ -245,14 +268,30 @@ function reset(target) {
     target.maxSegments = target.originalMaxSegments;
     target.prunes = 0;
     target.maxPrunes = target.originalMaxPrunes;
-    target.modifiers = [];
     target.animationTimeDiff = target.originalAnimationTimeDiff;
+
+    target.modifiers.forEach( modifier => {
+        modifier.toggleIndicator.classList.add("faded");        
+    });
+    target.modifiers = [];
 
     const targetSVG = document.querySelector(`#${this.target.domID} svg`);
     targetSVG.classList.toggle("faded");
 
     target.toggleVisibility("show");
     this.drawCounters(target);
+
+    const blossoms = document.querySelector("img.tree-blossoms");
+    blossoms.classList.add("faded");
+    blossoms.classList.remove("hidden");
+
+    const msgHeading = document.querySelector(".main-control .game-result");
+    msgHeading.innerText = "";
+
+    const gameWindow = document.querySelector("div.game-window");
+    const handicapIndicator = document.querySelector("div.handicap span.indicator");
+    gameWindow.className = "game-window col-12 col-md-9";
+    handicapIndicator.innerHTML = "no";
 }
 
 function activateResetButton() {
@@ -284,6 +323,10 @@ function start() {
     this.inProgress = true;
     this.target.updateCurrentSegment();
     this.drawCounters(this.target);
+
+    const blossoms = document.querySelector("img.tree-blossoms");
+    blossoms.classList.remove("faded");
+    blossoms.classList.add("hidden");
 }
 
 function end(gameResult) {
@@ -296,6 +339,9 @@ function end(gameResult) {
     const msgHeading = document.querySelector(".main-control .game-result");
     if (gameResult === "success") {
         msgHeading.innerText = "SUCCESS!";
+
+        const blossoms = document.querySelector("img.tree-blossoms");
+        blossoms.classList.remove("hidden");
     } else {
         msgHeading.innerText = "FAILURE!";
     }
