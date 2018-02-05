@@ -1,6 +1,6 @@
 ### SlapGame ("Prune"-clone)
 
-This game is an adaptation of the SlapGame conditions to make a very simplified, somewhat altered version of the game "Prune".
+This game is an adaptation of the SlapGame conditions to make a very simplified, somewhat altered version of the game ["Prune"](http://www.prunegame.com/).
 
 Instead of a target that can be hit in 3 different ways and suffer health-damage until it "dies", this game animates the growth of a ("target") tree whose branches can be "pruned" in 3 different ways as it grows -- in order to guide its growth toward a light-source before the maximum growth-size of the tree runs out.
 
