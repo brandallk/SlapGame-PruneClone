@@ -43,6 +43,12 @@ function Target(name, domID, totalSegments, maxSegments, maxPrunes, animationTim
 
 // Add a modifier to the game and apply its effect
 function giveItem(modifier) {
+    const gameWindow = document.querySelector("div.game-window");
+    const handicapIndicator = document.querySelector("div.handicap span.indicator");
+    const currentModNames = this.modifiers.map( modifier => {
+        return modifier.name;
+    });
+
     if (!this.modifiers.includes(modifier)) {
         this.modifiers.push(modifier);
         modifier.modifierEffect1();
@@ -53,13 +59,7 @@ function giveItem(modifier) {
 
         modifier.toggleIndicator.classList.remove("faded");
     }
-
-    const currentModNames = this.modifiers.map( modifier => {
-        return modifier.name;
-    });
-
-    const gameWindow = document.querySelector("div.game-window");
-    const handicapIndicator = document.querySelector("div.handicap span.indicator");
+    
     if (currentModNames.includes("clouds") && currentModNames.includes("moonlight")) {
         gameWindow.classList.add("darker-bluer-background")
     } else if (currentModNames.includes("clouds")) {
@@ -77,8 +77,9 @@ function giveItem(modifier) {
 function prune(multiplier) {
     
     if (this.prunes + multiplier <= this.maxPrunes) { // Can't exceed the maximum allowed number of prune actions
-        this.prunes += multiplier; // Update the prune count
+        
         const pruneCounterSpan = document.querySelector(`#${this.domID} .prunes-counter`);
+        this.prunes += multiplier; // Update the prune count
         pruneCounterSpan.innerText = this.prunes;
     
         if (!this.trunkSegments.includes(this.currentSegmentNumber) && // No pruning the trunk!
