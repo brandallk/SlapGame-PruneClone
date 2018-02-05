@@ -38,6 +38,49 @@ header hr {
 
 
 
+.game-info {
+    background-color: rgb(51, 51, 51);
+    color: rgb(231, 231, 231);
+    font-size: 0.65rem;
+    padding-bottom: 1rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .game-info {
+        padding-bottom: 0;
+        text-align: left;
+    }
+}
+
+@media (min-width: 850px) {
+    .game-info { font-size: 0.7rem; }
+}
+
+@media (min-width: 950px) {
+    .game-info { font-size: 0.8rem; }
+}
+
+@media (min-width: 1150px) {
+    .game-info { font-size: 0.9rem; }
+}
+
+@media (min-width: 1350px) {
+    .game-info { font-size: 1rem; }
+}
+
+.game-info h6 {
+    margin-bottom: 0.1rem;
+    margin-top: 0.25rem;
+    color: rgba(240, 0, 1, 0.7);
+}
+
+.game-info p {
+    margin-bottom: 0;
+}
+
+
+
 .game-window {
     padding: 0;
     background-color: rgb(248, 237, 207);
@@ -180,12 +223,6 @@ div.handicap.badge {
 
 @media (min-width: 576px) {
     div.handicap.badge { right: 7%; }
-}
-
-
-
-.game-info {
-    background-color: #333;
 }
 
 
